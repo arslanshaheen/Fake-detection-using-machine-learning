@@ -1,0 +1,28 @@
+---
+description: Mandatory fake news detection project requirements — always follow
+alwaysApply: true
+---
+
+# Fake News Detection — Must Follow
+
+Problem: automate real-time credibility scoring for news text; keyword filters are insufficient.
+
+## Required capabilities (do not drop)
+
+1. **Classification model** for Fake vs Real news.
+2. **Preprocess/clean** raw text: remove noise, normalize language, handle slang.
+3. **Features**: TF-IDF **and** word embeddings (or justify if only one is used temporarily).
+4. **Train/compare** classifiers including Passive Aggressive, Naive Bayes, Random Forest, and/or Transformer models (e.g. RoBERTa). Keep multiple baselines; select best by metrics.
+5. **Metrics**: Accuracy, Precision, Recall, **and ROC-AUC** (with curve export/plot where possible).
+6. **Web prototype**: user pastes a **news URL or text snippet** and gets an instant authenticity/credibility report (not CSV-only).
+
+## Research framing
+
+Prefer terms: misinformation detection, stance detection, linguistic features.
+
+## Implementation rules
+
+- Preserve module layout: Module1 ingest → Module2 preprocess/features → Module3 train/predict → Flask UI.
+- Prefer extending existing code over unrelated rewrites.
+- Credibility score / confidence must be part of the user-facing report.
+- When adding models or UI modes, keep training entrypoint (`train.py` / `make train`) and run docs (`runcommand.md`) accurate.

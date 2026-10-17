@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fake News Detection</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <p class="eyebrow">Module 1 → 2 → 3</p>
+      <h1>Fake News Detection</h1>
+      <p class="lede">Upload a CSV of articles. The model reads the text, scores each row, and labels it FAKE or REAL.</p>
+    </header>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flash">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <section class="panel">
+      <h2>Upload CSV</h2>
+      <p class="hint">
+        Expected columns: <code>title</code> + <code>text</code> (or <code>content</code> / <code>article</code> / <code>news</code>).
+      </p>
+
+      {% if not model_ready %}
+        <div class="warn">
+          Model not trained yet. Place <code>Fake.csv</code> and <code>True.csv</code> in
+          <code>data/</code>, then run <code>make train</code>.
+        </div>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" class="upload-form">
+        <label class="file-label">
+          <span>Choose CSV</span>
+          <input type="file" name="csv_file" accept=".csv" required {% if not model_ready %}disabled{% endif %} />
+        </label>
+        <button type="submit" {% if not model_ready %}disabled{% endif %}>Detect Fake News</button>
+      </form>
+    </section>
+
+    {% if results %}
+      <section class="panel stats">
+        <h2>Results</h2>
+        <div class="stat-row">
+          <div><span class="num">{{ total }}</span><span class="lbl">rows scored</span></div>
+          <div><span class="num fake">{{ fake_count }}</span><span class="lbl">FAKE</span></div>
+          <div><span class="num real">{{ real_count }}</span><span class="lbl">REAL</span></div>
+        </div>
+        {% if download_ready %}
+          <p><a class="download" href="{{ url_for('download') }}">Download predictions.csv</a></p>
+        {% endif %}
+      </section>
+
+      <section class="panel table-wrap">
+        <h2>Preview (first 50 rows)</h2>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr>
+                {% for col in columns %}
+                  {% if col not in ['clean_content'] %}
+                    <th>{{ col }}</th>
+                  {% endif %}
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+                <tr class="{% if row.prediction == 1 %}is-fake{% else %}is-real{% endif %}">
+                  {% for col in columns %}
+                    {% if col not in ['clean_content'] %}
+                      <td>
+                        {% if col == 'label_name' %}
+                          <span class="badge">{{ row[col] }}</span>
+                        {% elif col == 'content' %}
+                          {{ row[col][:180] }}{% if row[col]|length > 180 %}…{% endif %}
+                        {% else %}
+                          {{ row[col] }}
+                        {% endif %}
+                      </td>
+                    {% endif %}
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% endif %}
+
+    <footer>
+      Pipeline: Data Ingestion & Analysis → Preprocess & Feature Extraction → Baseline Model & Web UI
+    </footer>
+  </div>
+</body>
+</html>
